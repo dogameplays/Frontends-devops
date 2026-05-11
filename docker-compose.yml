@@ -8,6 +8,6 @@ services:
     ports:
       - "80:80"
     environment:
-      VITE_API_URL: ${VITE_API_URL:-http://localhost:3001}
+      VITE_API_URL: ${VITE_API_URL:-}
     labels:
       - "com.innovatech.service=frontend"
