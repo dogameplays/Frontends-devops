@@ -1,4 +1,4 @@
-name: Frontend Deploy to ECR and EC2
+name: Frontend Deploy to ECS Fargate
 
 on:
   push:
@@ -8,6 +8,10 @@ env:
   AWS_REGION: us-east-1
   ECR_REGISTRY: 121291936594.dkr.ecr.us-east-1.amazonaws.com
   ECR_REPOSITORY: repo-front
+  ECS_CLUSTER: innovatech-cluster           # El nombre de tu clúster
+  ECS_SERVICE: frontend-service             # El nombre del servicio ECS que crearemos
+  ECS_TASK_DEFINITION: frontend-task        # El nombre de la receta de tu Frontend
+  CONTAINER_NAME: frontend-container        # El nombre del contenedor
 
 jobs:
   build-push-deploy:
@@ -38,12 +42,14 @@ jobs:
         uses: aws-actions/amazon-ecr-login@v1
       
       - name: Build Docker image
+        id: build-image
         env:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           IMAGE_TAG: ${{ github.sha }}
         run: |
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
+          echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
       
       - name: Push image to Amazon ECR
         env:
@@ -53,35 +59,26 @@ jobs:
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
           echo "✅ Image pushed: $ECR_REGISTRY/$ECR_REPOSITORY:latest"
-      
-      - name: Get Frontend Instance ID
-        id: get-instance-id
+
+      # --- CAMBIOS PARA ECS FARGATE ---
+      - name: Download current task definition
         run: |
-          INSTANCE_ID=$(aws ec2 describe-instances \
-            --filters "Name=private-ip-address,Values=${{ secrets.EC2_FRONTEND_HOST }}" \
-            --query 'Reservations[0].Instances[0].InstanceId' \
-            --output text)
-          echo "instance-id=$INSTANCE_ID" >> $GITHUB_OUTPUT
-          echo "Instance ID: $INSTANCE_ID"
-      
-      - name: Deploy to EC2 Frontend via SSM
-        env:
-          INSTANCE_ID: ${{ steps.get-instance-id.outputs.instance-id }}
-          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
-          IMAGE_TAG: latest
-        run: |
-          aws ssm send-command \
-            --document-name "AWS-RunShellScript" \
-            --parameters "commands=[
-              'aws ecr get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin ${{ env.ECR_REGISTRY }}',
-              'docker pull ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}',
-              'docker stop innovatech_frontend || true',
-              'docker rm innovatech_frontend || true',
-              'docker run -d --name innovatech_frontend -p 80:80 ${{ env.ECR_REGISTRY }}/${{ env.ECR_REPOSITORY }}:${{ env.IMAGE_TAG }}',
-              'sleep 5',
-              'docker ps'
-            ]" \
-            --instance-ids "$INSTANCE_ID" \
-            --region ${{ env.AWS_REGION }}
-          
-          echo "✅ Frontend deployment command sent via SSM"
+          aws ecs describe-task-definition \
+            --task-definition ${{ env.ECS_TASK_DEFINITION }} \
+            --query taskDefinition > task-definition.json
+
+      - name: Fill in the new image ID in the Amazon ECS task definition
+        id: task-def
+        uses: aws-actions/amazon-ecs-render-task-definition@v1
+        with:
+          task-definition: task-definition.json
+          container-name: ${{ env.CONTAINER_NAME }}
+          image: ${{ steps.build-image.outputs.image }}
+
+      - name: Deploy Amazon ECS task definition
+        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
+        with:
+          task-definition: ${{ steps.task-def.outputs.task-definition }}
+          service: ${{ env.ECS_SERVICE }}
+          cluster: ${{ env.ECS_CLUSTER }}
+          wait-for-service-stability: true
