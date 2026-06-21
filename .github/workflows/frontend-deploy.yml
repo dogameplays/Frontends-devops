@@ -6,8 +6,8 @@ on:
 
 env:
   AWS_REGION: us-east-1
-  ECR_REGISTRY: 121291936594.dkr.ecr.us-east-1.amazonaws.com
-  ECR_REPOSITORY: repo-front
+  ECR_REGISTRY: 181331841510.dkr.ecr.us-east-1.amazonaws.com
+  ECR_REPOSITORY: innovatech-frontend
   ECS_CLUSTER: innovatech-cluster           # El nombre de tu clúster
   ECS_SERVICE: frontend-service             # El nombre del servicio ECS que crearemos
   ECS_TASK_DEFINITION: frontend-task        # El nombre de la receta de tu Frontend
