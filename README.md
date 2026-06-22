@@ -1,5 +1,6 @@
 # Frontends-devops
 
+<<<<<<< Updated upstream
 Frontend React + Vite para Innovatech Inventory System
 
 ## Setup Local
@@ -140,3 +141,71 @@ docker ps
 docker port innovatech_frontend
 ```
 
+=======
+Interfaz web para gestión de Inventario y Tickets desarrollada con React + Vite.
+
+## 🚀 Descripción
+Aplicación frontend para la solución Innovatech Chile. Proporciona una interfaz moderna y responsiva para la gestión de inventario y sistema de tickets.
+
+## 📋 Requisitos
+- Node.js v18+ (para desarrollo)
+- Docker y Docker Compose
+- npm o yarn
+
+## 🛠️ Stack Tecnológico
+- **React** ^18.3.1
+- **Vite** ^5.4.10
+- **CSS** personalizado
+
+## 📦 Instalación
+
+### Modo Desarrollo (sin Docker)
+```bash
+npm install
+npm run dev
+```
+
+### Con Docker Compose
+```bash
+docker-compose up --build
+```
+
+## 🔨 Comandos Disponibles
+```bash
+npm run dev      # Inicia servidor de desarrollo
+npm run build    # Compila para producción
+npm run preview  # Preview del build
+```
+
+## 🌍 Puerto
+- **80** (HTTP) - Acceso a la aplicación
+- **5173** (Dev) - Servidor de desarrollo Vite
+
+## 🔐 Variables de Entorno
+```
+VITE_API_URL=http://localhost:3001
+```
+
+## 📡 Rutas de API Consumidas
+- `GET /api/dashboard` - Dashboard principal
+- `GET /api/items` - Obtener inventario
+- `POST /api/items` - Crear nuevo item
+- `GET /api/tickets` - Obtener tickets
+- `POST /api/tickets` - Crear nuevo ticket
+
+## 📂 Estructura del Proyecto
+```
+src/
+├── api.js          # Configuración de API
+├── App.jsx         # Componente principal
+├── main.jsx        # Punto de entrada
+└── styles.css      # Estilos globales
+```
+
+## 🐳 Docker
+La aplicación está configurada con Nginx para servir archivos estáticos en producción.
+
+## 📝 Notas
+- El archivo `nginx.conf` contiene la configuración de Nginx
+- El archivo `vite.config.js` contiene la configuración de Vite
+>>>>>>> Stashed changes
