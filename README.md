@@ -3,7 +3,7 @@
 Interfaz web para gestión de Inventario y Tickets desarrollada con React + Vite.
 
 ## 🚀 Descripción
-Aplicación frontend para la solución Innovatech Chile. Proporciona una interfaz moderna y responsiva para la gestión de inventario y sistema de tickets.
+Aplicación frontend para la solución Innovatech Chile. Proporciona una interfaz moderna y responsiva para la gestión de inventario y sistema de tickets, compilada y servida con Nginx.
 
 ## 📋 Requisitos
 - Node.js v18+ (para desarrollo)
@@ -13,6 +13,7 @@ Aplicación frontend para la solución Innovatech Chile. Proporciona una interfa
 ## 🛠️ Stack Tecnológico
 - **React** ^18.3.1
 - **Vite** ^5.4.10
+- **Nginx** (para servir archivos estáticos en producción)
 - **CSS** personalizado
 
 ## 📦 Instalación
@@ -30,19 +31,27 @@ docker-compose up --build
 
 ## 🔨 Comandos Disponibles
 ```bash
-npm run dev      # Inicia servidor de desarrollo
+npm run dev      # Inicia servidor de desarrollo Vite
 npm run build    # Compila para producción
 npm run preview  # Preview del build
 ```
 
-## 🌍 Puerto
-- **80** (HTTP) - Acceso a la aplicación
+## 🌍 Puertos
+- **80** (HTTP) - Acceso a la aplicación en producción
 - **5173** (Dev) - Servidor de desarrollo Vite
 
 ## 🔐 Variables de Entorno
+Se configura en `docker-compose.yml`:
 ```
-VITE_API_URL=http://10.0.2.210:3001
+VITE_API_URL=http://localhost:3001
 ```
+
+El `docker-compose.yml` permite sobrescribir con:
+```bash
+docker-compose up -e VITE_API_URL=http://tu-api:3001
+```
+
+**En producción:** Se apunta al Backend en **http://98.88.43.196:3001**
 
 ## 📡 Rutas de API Consumidas
 - `GET /api/dashboard` - Dashboard principal
@@ -54,24 +63,38 @@ VITE_API_URL=http://10.0.2.210:3001
 ## 📂 Estructura del Proyecto
 ```
 src/
-├── api.js          # Configuración de API
+├── api.js          # Configuración de llamadas API
 ├── App.jsx         # Componente principal
 ├── main.jsx        # Punto de entrada
 └── styles.css      # Estilos globales
 ```
 
 ## 🐳 Docker
-La aplicación está configurada con Nginx para servir archivos estáticos en producción.
+**Dockerfile:** Multi-stage build optimizado
+- **Stage 1 (Build):** Node.js 18 Alpine compila con Vite
+- **Stage 2 (Production):** Nginx Alpine sirve archivos estáticos compilados
+- Expone puerto 80
+- Copia configuración Nginx personalizada
+
+**Tamaño optimizado:** Solo incluye archivos compilados, no el código fuente
+
+## 🔧 Configuración Nginx
+El archivo `nginx.conf` está configurado para:
+- Servir archivos estáticos desde `/usr/share/nginx/html`
+- Soporte para SPA (rewrite de rutas)
+- Proxy inverso si es necesario
 
 ## 🚀 Deploy
-Push a rama `deploy` dispara GitHub Actions que:
-1. Compila imagen React
-2. Push a ECR
-3. Despliega en EC2 via SSM
+Push a rama `main` dispara GitHub Actions que:
+1. Compila imagen Docker (multi-stage)
+2. Push a ECR (AWS Elastic Container Registry)
+3. Despliega en EC2 via Systems Manager
 
 ## 📝 Notas
-- El archivo `nginx.conf` contiene la configuración de Nginx
-- El archivo `vite.config.js` contiene la configuración de Vite
+- El build de Vite genera archivos en `dist/`
+- Nginx es más eficiente que Node.js para servir archivos estáticos
+- El archivo `vite.config.js` contiene la configuración del bundler
+- Las variables de entorno se cargan al momento del build, no en tiempo de ejecución
 - Accesible en: http://98.88.43.196
 - Puerto: 80
 
