@@ -1,33 +1,77 @@
-# Frontends-devops
+# Frontend DevOps
 
-<<<<<<< Updated upstream
-Frontend React + Vite para Innovatech Inventory System
+Interfaz web para gestión de Inventario y Tickets desarrollada con React + Vite.
 
-## Setup Local
+## 🚀 Descripción
+Aplicación frontend para la solución Innovatech Chile. Proporciona una interfaz moderna y responsiva para la gestión de inventario y sistema de tickets.
 
+## 📋 Requisitos
+- Node.js v18+ (para desarrollo)
+- Docker y Docker Compose
+- npm o yarn
+
+## 🛠️ Stack Tecnológico
+- **React** ^18.3.1
+- **Vite** ^5.4.10
+- **CSS** personalizado
+
+## 📦 Instalación
+
+### Modo Desarrollo (sin Docker)
 ```bash
 npm install
-npm run dev          # Desarrollo
-npm run build        # Producción
+npm run dev
 ```
 
-## Docker
-
+### Con Docker Compose
 ```bash
-docker build -t innovatech-frontend .
-docker run -p 80:80 -e VITE_API_URL=http://10.0.2.210:3001 innovatech-frontend
+docker-compose up --build
 ```
 
-## Deploy
+## 🔨 Comandos Disponibles
+```bash
+npm run dev      # Inicia servidor de desarrollo
+npm run build    # Compila para producción
+npm run preview  # Preview del build
+```
 
+## 🌍 Puerto
+- **80** (HTTP) - Acceso a la aplicación
+- **5173** (Dev) - Servidor de desarrollo Vite
+
+## 🔐 Variables de Entorno
+```
+VITE_API_URL=http://10.0.2.210:3001
+```
+
+## 📡 Rutas de API Consumidas
+- `GET /api/dashboard` - Dashboard principal
+- `GET /api/items` - Obtener inventario
+- `POST /api/items` - Crear nuevo item
+- `GET /api/tickets` - Obtener tickets
+- `POST /api/tickets` - Crear nuevo ticket
+
+## 📂 Estructura del Proyecto
+```
+src/
+├── api.js          # Configuración de API
+├── App.jsx         # Componente principal
+├── main.jsx        # Punto de entrada
+└── styles.css      # Estilos globales
+```
+
+## 🐳 Docker
+La aplicación está configurada con Nginx para servir archivos estáticos en producción.
+
+## 🚀 Deploy
 Push a rama `deploy` dispara GitHub Actions que:
 1. Compila imagen React
 2. Push a ECR
 3. Despliega en EC2 via SSM
 
-## Variables Importantes
-
-- `VITE_API_URL=http://10.0.2.210:3001` (Backend API)
+## 📝 Notas
+- El archivo `nginx.conf` contiene la configuración de Nginx
+- El archivo `vite.config.js` contiene la configuración de Vite
 - Accesible en: http://98.88.43.196
 - Puerto: 80
 
