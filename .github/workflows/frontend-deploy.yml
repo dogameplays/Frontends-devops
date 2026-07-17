@@ -6,12 +6,12 @@ on:
 
 env:
   AWS_REGION: us-east-1
-  ECR_REGISTRY: 181331841510.dkr.ecr.us-east-1.amazonaws.com
-  ECR_REPOSITORY: innovatech-frontend
-  ECS_CLUSTER: innovatech-cluster           # El nombre de tu clúster
-  ECS_SERVICE: frontend-service             # El nombre del servicio ECS que crearemos
-  ECS_TASK_DEFINITION: frontend-task        # El nombre de la receta de tu Frontend
-  CONTAINER_NAME: frontend-container        # El nombre del contenedor
+  ECR_REGISTRY: 061532289995.dkr.ecr.us-east-1.amazonaws.com
+  ECR_REPOSITORY: innovatech/frontend
+  ECS_CLUSTER: innovatech-cluster
+  ECS_SERVICE: innovatech-frontend-service
+  ECS_TASK_DEFINITION: innovatech-frontend
+  CONTAINER_NAME: frontend
 
 jobs:
   build-push-deploy:
@@ -47,7 +47,9 @@ jobs:
           ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           IMAGE_TAG: ${{ github.sha }}
         run: |
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker build \
+            --build-arg VITE_API_URL="" \
+            -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
           docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
           echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
       
